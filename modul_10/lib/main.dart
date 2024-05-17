@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:modul_10/profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,11 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: const [
                       Text(
                         "Welcome",
                         style: TextStyle(
@@ -78,9 +79,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     ],
                   ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage('images/profpic.jpg'),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfileScreen()),
+                      );
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage('images/profpic.jpg'),
+                    ),
                   )
                 ],
               ),
