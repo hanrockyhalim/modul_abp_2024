@@ -2,9 +2,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:modul_10/profile_screen.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _initializeNotifications();
   runApp(const MyApp());
+}
+
+Future<void> _initializeNotifications() async {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  final InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 }
 
 class MyApp extends StatelessWidget {
@@ -32,6 +46,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   final data = const [
     {"tgl": "02/03/2022", "nilai": "150"},
     {"tgl": "01/02/2022", "nilai": "140"},
@@ -44,6 +60,23 @@ class _MyHomePageState extends State<MyHomePage> {
     {"tgl": "06/07/2022", "nilai": "145"},
     {"tgl": "05/06/2022", "nilai": "140"},
   ];
+
+  bool _notificationVisible = false;
+
+  void _toggleNotification() {
+    setState(() {
+      _notificationVisible = !_notificationVisible;
+      if (_notificationVisible) {
+        _showNotification();
+      } else {
+        _cancelNotification();
+      }
+    });
+  }
+
+  Future<void> _cancelNotification() async {
+    await flutterLocalNotificationsPlugin.cancel(0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +112,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     ],
                   ),
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _toggleNotification,
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor:
+                          _notificationVisible ? Colors.blue : Colors.grey,
+                      child: Icon(
+                        _notificationVisible
+                            ? Icons.notifications_active
+                            : Icons.notifications_off,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -91,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       radius: 20,
                       backgroundImage: AssetImage('images/profpic.jpg'),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -190,5 +238,27 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails('your channel id', 'your channel name',
+            importance: Importance.max, priority: Priority.high);
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'New Test Result Available',
+      'Your latest test result is now available!',
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Call _showNotification when the widget is initialized, as an example
+    _showNotification();
   }
 }
